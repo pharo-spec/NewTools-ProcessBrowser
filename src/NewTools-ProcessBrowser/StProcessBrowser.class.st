@@ -107,7 +107,8 @@ StProcessBrowser >> refreshProcessList [
 StProcessBrowser >> updateCodeFromContext: aContext [
 
 	aContext ifNil: [ 
-		codePresenter 
+		codePresenter
+			"clearInteractionModel; "
 			text: ''; 
 			enabled: false.
 		^ self ].
