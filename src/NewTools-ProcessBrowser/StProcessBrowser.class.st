@@ -6,7 +6,8 @@ Class {
 		'stackListPresenter',
 		'codePresenter',
 		'model',
-		'toolbarPresenter'
+		'toolbarPresenter',
+		'lastToolbarPresenter'
 	],
 	#category : #'NewTools-ProcessBrowser'
 }
@@ -46,8 +47,8 @@ StProcessBrowser >> defaultLayout [
 
 	^ SpBoxLayout newTopToBottom 
 		add: (SpBoxLayout newLeftToRight 
-				hAlignEnd;
-				add: toolbarPresenter expand: false;
+				add: toolbarPresenter;
+				add: lastToolbarPresenter expand: false;
 				yourself) 
 			expand: false;
 		add: (SpPanedLayout newTopToBottom
@@ -62,24 +63,37 @@ StProcessBrowser >> defaultLayout [
 ]
 
 { #category : #initialization }
+StProcessBrowser >> displayForContext: aContext [
+	
+	^ aContext method printString lines first
+]
+
+{ #category : #initialization }
+StProcessBrowser >> displayForProcess: aProcess [
+	
+	^ '({1}) {2}' format: { aProcess priority. aProcess name }
+]
+
+{ #category : #initialization }
 StProcessBrowser >> initializePresenters [
 
+	(toolbarPresenter := self newToolbar)
+		displayMode: self application toolbarDisplayMode;
+		addStyle: 'stToolbar';
+		fillWith: self toolbarActions.
 
-	toolbarPresenter := self newToolbar.
-	toolbarPresenter add: (self newToolbarButton
-		label: 'Refresh';
-		icon: (self iconNamed: #refresh);
-		action: [ self refreshProcessList ];
-		yourself).
+	(lastToolbarPresenter := self newToolbar)
+		displayMode: self application toolbarDisplayMode;
+		addStyle: 'stToolbar';
+		fillWith: self lastToolbarActions.
 			
 	processListPresenter := self newEasyListView.
-	processListPresenter display: [ :aProcess | 
-		'({1}) {2}' format: { aProcess priority. aProcess name } ].
+	processListPresenter display: [ :aProcess | self displayForProcess: aProcess ].
 
 	stackListPresenter := self newEasyListView.
-	stackListPresenter display: [ :aContext | aContext method printString ].
+	stackListPresenter display: [ :aContext | self displayForContext: aContext ].
 	
-	codePresenter := self newText
+	codePresenter := self newCode
 ]
 
 { #category : #initialization }
@@ -88,6 +102,24 @@ StProcessBrowser >> initializeWindow: aWindowPresenter [
 	aWindowPresenter
 		title: self class title;
 		initialExtent: self class defaultExtent
+]
+
+{ #category : #actions }
+StProcessBrowser >> inspectSelectedProcess [
+
+	self flag: #TODO
+]
+
+{ #category : #initialization }
+StProcessBrowser >> lastToolbarActions [
+	
+	^ SpActionGroup new
+		addActionWith: [ :action | action 
+			name: 'Refresh';
+			iconName: #refresh;
+			description: 'Refresh list of process.'; 
+			action: [ self refreshProcessList ] ];
+		yourself
 ]
 
 { #category : #'accessing - model' }
@@ -103,19 +135,42 @@ StProcessBrowser >> refreshProcessList [
 	self updatePresenter
 ]
 
+{ #category : #actions }
+StProcessBrowser >> terminateSelectedProcess [
+
+	self flag: #TODO
+]
+
+{ #category : #initialization }
+StProcessBrowser >> toolbarActions [
+	
+	^ SpActionGroup new
+		addActionWith: [ :action | action 
+			name: 'Terminate';
+			iconName: #stop; 
+			description: 'Terminate selected process.';
+			action: [ self terminateSelectedProcess ] ];
+		addActionWith: [ :action | action 
+			name: 'Inspect';
+			iconName: #smallInspectIt;
+			description: 'Inspect selected process.';
+			action: [ self inspectSelectedProcess ] ];
+		yourself
+]
+
 { #category : #initialization }
 StProcessBrowser >> updateCodeFromContext: aContext [
 
 	aContext ifNil: [ 
 		codePresenter
-			"clearInteractionModel; "
+			clearInteractionModel;
 			text: ''; 
 			enabled: false.
 		^ self ].
 	
-	codePresenter 
+	codePresenter
 		enabled: true;
-		"beForMethod: aContext method;"
+		beForMethod: aContext method;
 		text: aContext method sourceCode
 ]
 
