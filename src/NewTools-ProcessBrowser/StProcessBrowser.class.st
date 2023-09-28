@@ -9,7 +9,8 @@ Class {
 		'processToolbarActions',
 		'processToolbarPresenter',
 		'generalToolbarPresenter',
-		'generalToolbarActions'
+		'generalToolbarActions',
+		'contextToolbarActions'
 	],
 	#category : #'NewTools-ProcessBrowser'
 }
@@ -33,10 +34,47 @@ StProcessBrowser class >> title [
 	^ 'Process Browser'
 ]
 
+{ #category : #actions }
+StProcessBrowser >> browseSelectedContext [
+
+	self flag: #TODO
+]
+
+{ #category : #private }
+StProcessBrowser >> buildContextToolbarActions [
+
+	^ SpActionGroup new
+		addActionWith: [ :action | action 
+			name: 'Inspect';
+			iconName: #smallInspectIt;
+			description: 'Inspect selected context.';
+			shortcut: $i meta;
+			action: [ self inspectSelectedContext ] ];
+		addActionWith: [ :action | action 
+			name: 'Browse';
+			iconName: #smallSystemBrowser;
+			description: 'Browse context.';
+			shortcut: $b meta;
+			action: [ self browseSelectedContext ] ];
+		yourself
+]
+
 { #category : #private }
 StProcessBrowser >> buildGeneralToolbarActions [
 	
 	^ SpActionGroup new
+		addActionWith: [ :action | action 
+			name: 'CPU Watcher';
+			iconName: #watch;
+			description: 'Toggle CPU watcher.';
+			beToggleButton; 
+			action: [ self toggleCPUWatcher: action presenter state ] ];
+		addActionWith: [ :action | action 
+			name: 'Auto update';
+			iconName: #autoUpdate;
+			description: 'Toggle auto processes update.';
+			beToggleButton;
+			action: [ self toggleAutoUpdate: action presenter state ] ];
 		addActionWith: [ :action | action 
 			name: 'Refresh';
 			iconName: #refresh;
@@ -53,35 +91,76 @@ StProcessBrowser >> buildProcessToolbarActions [
 			name: 'Terminate';
 			iconName: #stop; 
 			description: 'Terminate selected process.';
+			shortcut: $t meta;
 			action: [ self terminateSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Suspend';
 			iconName: #pause; 
 			description: 'Suspend selected process.';
+			shortcut: $s meta;
 			action: [ self suspendSelectedProcess ];
+			actionEnabled: [ self selectedProcess notNil ] ];
+		addActionWith: [ :action | action 
+			name: 'Priority';
+			iconName: #priority; 
+			description: 'Change priority of selected process.';
+			shortcut: $p meta;
+			action: [ self changePriorityOfSelectedProcess ];
+			actionEnabled: [ self selectedProcess notNil ] ];
+		addActionWith: [ :action | action 
+			name: 'Debug';
+			iconName: #smallDebug; 
+			description: 'Debug selected process.';
+			shortcut: $d meta;
+			action: [ self debugSelectedProcess ];
+			actionEnabled: [ self selectedProcess notNil ] ];
+		addActionWith: [ :action | action 
+			name: 'Profile';
+			iconName: #smallProfile; 
+			description: 'Profile selected process.';
+			action: [ self profileSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Inspect';
 			iconName: #smallInspectIt;
 			description: 'Inspect selected process.';
+			shortcut: $i meta;			
 			action: [ self inspectSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		yourself
 ]
 
+{ #category : #actions }
+StProcessBrowser >> changePriorityOfSelectedProcess [
+
+	self flag: #TODO.
+]
+
 { #category : #initialization }
 StProcessBrowser >> connectPresenters [
 
-	processListPresenter 
-		transmitTo: stackListPresenter
-		transform: [ :aProcess | self model stackListFor: aProcess ].
-		
-	processListPresenter 
+	processListPresenter outputActivationPort
+		transmitTo: stackListPresenter defaultInputPort
+			transform: [ :aProcess | self model stackListFor: aProcess ].
+			
+	processListPresenter outputSelectionPort 
 		transmitDo: [ self updateToolbar ].
 		
-	stackListPresenter 
+	stackListPresenter outputActivationPort
 		transmitDo: [ :aContext | self updateCodeFromContext: aContext ]
+]
+
+{ #category : #'private - accessing' }
+StProcessBrowser >> contextToolbarActions [
+	
+	^ contextToolbarActions ifNil: [ contextToolbarActions := self buildContextToolbarActions ]
+]
+
+{ #category : #actions }
+StProcessBrowser >> debugSelectedProcess [
+
+	self flag: #TODO.
 ]
 
 { #category : #layout }
@@ -116,6 +195,12 @@ StProcessBrowser >> displayForProcess: aProcess [
 	^ '({1}) {2}' format: { aProcess priority. aProcess name }
 ]
 
+{ #category : #private }
+StProcessBrowser >> ensureAllWatchersAreClosed [
+
+	self flag: #TODO. "This is to cleanup the processes for watching/auto-update"
+]
+
 { #category : #'private - accessing' }
 StProcessBrowser >> generalToolbarActions [	
 	
@@ -135,13 +220,18 @@ StProcessBrowser >> initializePresenters [
 		addStyle: 'stToolbar';
 		fillWith: self generalToolbarActions.
 			
-	processListPresenter := self newEasyListView.
-	processListPresenter display: [ :aProcess | self displayForProcess: aProcess ].
+	(processListPresenter := self newEasyListView)
+		activateOnSingleClick;
+		actionGroup: self processToolbarActions;
+		display: [ :aProcess | self displayForProcess: aProcess ].
 
-	stackListPresenter := self newEasyListView.
-	stackListPresenter display: [ :aContext | self displayForContext: aContext ].
+	(stackListPresenter := self newEasyListView)
+		activateOnSingleClick;
+		actionGroup: self contextToolbarActions;
+		display: [ :aContext | self displayForContext: aContext ].
 	
-	codePresenter := self newCode
+	codePresenter := self newCode.
+	codePresenter enabled: false
 ]
 
 { #category : #initialization }
@@ -149,7 +239,14 @@ StProcessBrowser >> initializeWindow: aWindowPresenter [
 
 	aWindowPresenter
 		title: self class title;
-		initialExtent: self class defaultExtent
+		initialExtent: self class defaultExtent;
+		whenClosedDo: [ self ensureAllWatchersAreClosed ]
+]
+
+{ #category : #actions }
+StProcessBrowser >> inspectSelectedContext [
+
+	self flag: #TODO
 ]
 
 { #category : #actions }
@@ -173,10 +270,16 @@ StProcessBrowser >> processToolbarActions [
 ]
 
 { #category : #actions }
+StProcessBrowser >> profileSelectedProcess [
+
+	self flag: #TODO.
+]
+
+{ #category : #actions }
 StProcessBrowser >> refreshProcessList [
 
 	self model updateProcessList.
-	self updatePresenter
+	processListPresenter updateItemsKeepingSelection: self model processList
 ]
 
 { #category : #'private - accessing' }
@@ -209,6 +312,18 @@ StProcessBrowser >> terminateSelectedProcess [
 	process terminate.
 	self updatePresenter
 
+]
+
+{ #category : #actions }
+StProcessBrowser >> toggleAutoUpdate: aBoolean [
+
+	aBoolean crTrace
+]
+
+{ #category : #actions }
+StProcessBrowser >> toggleCPUWatcher: aBoolean [
+
+	aBoolean crTrace
 ]
 
 { #category : #initialization }
