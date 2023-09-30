@@ -48,13 +48,13 @@ StProcessBrowser >> buildContextToolbarActions [
 			name: 'Inspect';
 			iconName: #smallInspectIt;
 			description: 'Inspect selected context.';
-			shortcut: $i meta;
+			shortcut: $i actionModifier;
 			action: [ self inspectSelectedContext ] ];
 		addActionWith: [ :action | action 
 			name: 'Browse';
 			iconName: #smallSystemBrowser;
 			description: 'Browse context.';
-			shortcut: $b meta;
+			shortcut: $b actionModifier;
 			action: [ self browseSelectedContext ] ];
 		yourself
 ]
@@ -91,28 +91,28 @@ StProcessBrowser >> buildProcessToolbarActions [
 			name: 'Terminate';
 			iconName: #stop; 
 			description: 'Terminate selected process.';
-			shortcut: $t meta;
+			shortcut: $t actionModifier;
 			action: [ self terminateSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Suspend';
 			iconName: #pause; 
 			description: 'Suspend selected process.';
-			shortcut: $s meta;
+			shortcut: $s actionModifier;
 			action: [ self suspendSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Priority';
 			iconName: #priority; 
 			description: 'Change priority of selected process.';
-			shortcut: $p meta;
+			shortcut: $p actionModifier;
 			action: [ self changePriorityOfSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Debug';
 			iconName: #smallDebug; 
 			description: 'Debug selected process.';
-			shortcut: $d meta;
+			shortcut: $d actionModifier;
 			action: [ self debugSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
@@ -125,7 +125,7 @@ StProcessBrowser >> buildProcessToolbarActions [
 			name: 'Inspect';
 			iconName: #smallInspectIt;
 			description: 'Inspect selected process.';
-			shortcut: $i meta;			
+			shortcut: $i actionModifier;
 			action: [ self inspectSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		yourself
