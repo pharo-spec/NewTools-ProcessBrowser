@@ -1,6 +1,6 @@
 Class {
-	#name : #StProcessBrowser,
-	#superclass : #StPresenter,
+	#name : 'StProcessBrowser',
+	#superclass : 'StPresenter',
 	#instVars : [
 		'processListPresenter',
 		'stackListPresenter',
@@ -12,35 +12,36 @@ Class {
 		'generalToolbarActions',
 		'contextToolbarActions'
 	],
-	#category : #'NewTools-ProcessBrowser'
+	#category : 'NewTools-ProcessBrowser',
+	#package : 'NewTools-ProcessBrowser'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 StProcessBrowser class >> defaultExtent [
 
 	^ 800@550
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 StProcessBrowser class >> open [
 	<script>
 	
 	^ self new open
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 StProcessBrowser class >> title [
 
 	^ 'Process Browser'
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> browseSelectedContext [
 
 	self flag: #TODO
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 StProcessBrowser >> buildContextToolbarActions [
 
 	^ SpActionGroup new
@@ -59,7 +60,7 @@ StProcessBrowser >> buildContextToolbarActions [
 		yourself
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 StProcessBrowser >> buildGeneralToolbarActions [
 	
 	^ SpActionGroup new
@@ -83,7 +84,7 @@ StProcessBrowser >> buildGeneralToolbarActions [
 		yourself
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 StProcessBrowser >> buildProcessToolbarActions [
 
 	^ SpActionGroup new
@@ -131,13 +132,13 @@ StProcessBrowser >> buildProcessToolbarActions [
 		yourself
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> changePriorityOfSelectedProcess [
 
 	self flag: #TODO.
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> connectPresenters [
 
 	processListPresenter outputActivationPort
@@ -151,19 +152,25 @@ StProcessBrowser >> connectPresenters [
 		transmitDo: [ :aContext | self updateCodeFromContext: aContext ]
 ]
 
-{ #category : #'private - accessing' }
+{ #category : 'private - accessing' }
 StProcessBrowser >> contextToolbarActions [
 	
 	^ contextToolbarActions ifNil: [ contextToolbarActions := self buildContextToolbarActions ]
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> debugSelectedProcess [
 
 	self flag: #TODO.
 ]
 
-{ #category : #layout }
+{ #category : 'api - focus' }
+StProcessBrowser >> defaultKeyboardFocus [
+
+	^ processListPresenter 
+]
+
+{ #category : 'layout' }
 StProcessBrowser >> defaultLayout [
 
 	^ SpBoxLayout newTopToBottom 
@@ -183,31 +190,31 @@ StProcessBrowser >> defaultLayout [
 		yourself
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> displayForContext: aContext [
 	
 	^ aContext method printString lines first
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> displayForProcess: aProcess [
 	
 	^ '({1}) {2}' format: { aProcess priority. aProcess name }
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 StProcessBrowser >> ensureAllWatchersAreClosed [
 
 	self flag: #TODO. "This is to cleanup the processes for watching/auto-update"
 ]
 
-{ #category : #'private - accessing' }
+{ #category : 'private - accessing' }
 StProcessBrowser >> generalToolbarActions [	
 	
 	^ generalToolbarActions	 ifNil: [ generalToolbarActions := self buildGeneralToolbarActions ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> initializePresenters [
 
 	(processToolbarPresenter := self newToolbar)
@@ -234,7 +241,7 @@ StProcessBrowser >> initializePresenters [
 	codePresenter enabled: false
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> initializeWindow: aWindowPresenter [
 
 	aWindowPresenter
@@ -243,13 +250,13 @@ StProcessBrowser >> initializeWindow: aWindowPresenter [
 		whenClosedDo: [ self ensureAllWatchersAreClosed ]
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> inspectSelectedContext [
 
 	self flag: #TODO
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> inspectSelectedProcess [
 	| process |
 
@@ -257,44 +264,44 @@ StProcessBrowser >> inspectSelectedProcess [
 	process inspect
 ]
 
-{ #category : #'accessing - model' }
+{ #category : 'accessing - model' }
 StProcessBrowser >> model [
 
 	^ model ifNil: [ model := StProcessBrowserModel new ]
 ]
 
-{ #category : #'private - accessing' }
+{ #category : 'private - accessing' }
 StProcessBrowser >> processToolbarActions [
 	
 	^ processToolbarActions ifNil: [ processToolbarActions := self buildProcessToolbarActions ]
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> profileSelectedProcess [
 
 	self flag: #TODO.
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> refreshProcessList [
 
 	self model updateProcessList.
 	processListPresenter updateItemsKeepingSelection: self model processList
 ]
 
-{ #category : #'private - accessing' }
+{ #category : 'private - accessing' }
 StProcessBrowser >> selectedContext [
 
 	^ stackListPresenter selectedItem
 ]
 
-{ #category : #'private - accessing' }
+{ #category : 'private - accessing' }
 StProcessBrowser >> selectedProcess [
 
 	^ processListPresenter selectedItem
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> suspendSelectedProcess [
 	| process |
 
@@ -304,7 +311,7 @@ StProcessBrowser >> suspendSelectedProcess [
 
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> terminateSelectedProcess [
 	| process |
 
@@ -314,19 +321,19 @@ StProcessBrowser >> terminateSelectedProcess [
 
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> toggleAutoUpdate: aBoolean [
 
 	aBoolean crTrace
 ]
 
-{ #category : #actions }
+{ #category : 'actions' }
 StProcessBrowser >> toggleCPUWatcher: aBoolean [
 
 	aBoolean crTrace
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> updateCodeFromContext: aContext [
 
 	aContext ifNil: [ 
@@ -342,7 +349,7 @@ StProcessBrowser >> updateCodeFromContext: aContext [
 		text: aContext method sourceCode
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowser >> updatePresenter [
 
 	self model ifNil: [ ^ self ].
@@ -350,7 +357,7 @@ StProcessBrowser >> updatePresenter [
 	self updateToolbar
 ]
 
-{ #category : #'private - updating' }
+{ #category : 'private - updating' }
 StProcessBrowser >> updateToolbar [
 
 	self processToolbarActions allCommands

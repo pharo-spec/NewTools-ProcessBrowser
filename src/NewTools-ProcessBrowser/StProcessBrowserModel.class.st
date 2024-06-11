@@ -1,40 +1,41 @@
 Class {
-	#name : #StProcessBrowserModel,
-	#superclass : #Object,
+	#name : 'StProcessBrowserModel',
+	#superclass : 'Object',
 	#instVars : [
 		'processList',
 		'lastUpdate'
 	],
-	#category : #'NewTools-ProcessBrowser'
+	#category : 'NewTools-ProcessBrowser',
+	#package : 'NewTools-ProcessBrowser'
 }
 
-{ #category : #defaults }
+{ #category : 'defaults' }
 StProcessBrowserModel class >> defaultStackDepth [
 
 	^ 20
 ]
 
-{ #category : #'private - accessing' }
+{ #category : 'private - accessing' }
 StProcessBrowserModel >> allNonTerminatedProcesses [
 
 	^ Process allProcesses reject: [ :each | each isTerminated ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 StProcessBrowserModel >> initialize [
 
 	super initialize.
 	lastUpdate := 0
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 StProcessBrowserModel >> processList [
 
 	self updateProcessList.
 	^ processList
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 StProcessBrowserModel >> stackListFor: aProcess [
 
 	aProcess ifNil: [ ^ #() ].
@@ -44,7 +45,7 @@ StProcessBrowserModel >> stackListFor: aProcess [
 		depth: self class defaultStackDepth
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 StProcessBrowserModel >> stackListFor: aProcess depth: depth [
 
 	^ (aProcess == Processor activeProcess)
@@ -55,7 +56,7 @@ StProcessBrowserModel >> stackListFor: aProcess depth: depth [
 				ifNil: [ #() ] ]
 ]
 
-{ #category : #updating }
+{ #category : 'updating' }
 StProcessBrowserModel >> updateProcessList [
 	| now |
 

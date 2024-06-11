@@ -1,1 +1,1 @@
-Package { #name : #'NewTools-ProcessBrowser' }
+Package { #name : 'NewTools-ProcessBrowser' }
