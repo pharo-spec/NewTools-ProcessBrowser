@@ -229,12 +229,12 @@ StProcessBrowser >> initializePresenters [
 			
 	(processListPresenter := self newEasyListView)
 		activateOnSingleClick;
-		actionGroup: self processToolbarActions;
+		addActionGroup: self processToolbarActions;
 		display: [ :aProcess | self displayForProcess: aProcess ].
 
 	(stackListPresenter := self newEasyListView)
 		activateOnSingleClick;
-		actionGroup: self contextToolbarActions;
+		addActionGroup: self contextToolbarActions;
 		display: [ :aContext | self displayForContext: aContext ].
 	
 	codePresenter := self newCode.
