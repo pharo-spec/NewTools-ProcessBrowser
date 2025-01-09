@@ -298,7 +298,7 @@ StProcessBrowser >> selectedContext [
 { #category : 'private - accessing' }
 StProcessBrowser >> selectedProcess [
 
-	^ processListPresenter selectedItem
+	^ processListPresenter ifNotNil: #selectedItem
 ]
 
 { #category : 'actions' }
