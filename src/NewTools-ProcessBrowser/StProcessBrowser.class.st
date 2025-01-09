@@ -10,7 +10,8 @@ Class {
 		'processToolbarPresenter',
 		'generalToolbarPresenter',
 		'generalToolbarActions',
-		'contextToolbarActions'
+		'contextToolbarActions',
+		'autoUpdateProcess'
 	],
 	#category : 'NewTools-ProcessBrowser',
 	#package : 'NewTools-ProcessBrowser'
@@ -264,6 +265,25 @@ StProcessBrowser >> inspectSelectedProcess [
 	process inspect
 ]
 
+{ #category : 'private - testing' }
+StProcessBrowser >> isAutoUpdating [
+
+	^ autoUpdateProcess isNotNil and: [ autoUpdateProcess isSuspended  not ]
+]
+
+{ #category : 'private - testing' }
+StProcessBrowser >> isAutoUpdatingPaused [
+
+	^ autoUpdateProcess isNotNil and: [ autoUpdateProcess isSuspended ]
+]
+
+{ #category : 'private - testing' }
+StProcessBrowser >> isOpen [
+
+	self withWindowDo: [ :aWindow | ^ aWindow isOpen ].
+	^ false
+]
+
 { #category : 'accessing - model' }
 StProcessBrowser >> model [
 
@@ -301,6 +321,36 @@ StProcessBrowser >> selectedProcess [
 	^ processListPresenter ifNotNil: #selectedItem
 ]
 
+{ #category : 'private' }
+StProcessBrowser >> startAutoUpdate [
+
+	self isAutoUpdatingPaused ifTrue: [ ^ autoUpdateProcess resume ].
+	
+	self isAutoUpdating ifFalse: [
+		| delay |
+		delay := Delay forSeconds: 2.
+		autoUpdateProcess := [ 
+			[ self isOpen ]
+			whileTrue: [
+				delay wait.
+				self updatePresenter ].
+			autoUpdateProcess := nil 
+		] forkNamed: 'Auto-update process' ].
+	
+	self updatePresenter
+]
+
+{ #category : 'private' }
+StProcessBrowser >> stopAutoUpdate [
+
+	autoUpdateProcess ifNotNil: [
+		autoUpdateProcess terminate.
+		autoUpdateProcess := nil ].
+	"give it time to die" 
+	3 timesRepeat: [ Processor yield ].
+	self updatePresenter
+]
+
 { #category : 'actions' }
 StProcessBrowser >> suspendSelectedProcess [
 	| process |
@@ -308,7 +358,6 @@ StProcessBrowser >> suspendSelectedProcess [
 	(process := self selectedProcess) ifNil: [ ^ self ].
 	process suspend.
 	self updatePresenter
-
 ]
 
 { #category : 'actions' }
@@ -318,19 +367,20 @@ StProcessBrowser >> terminateSelectedProcess [
 	(process := self selectedProcess) ifNil: [ ^ self ].
 	process terminate.
 	self updatePresenter
-
 ]
 
 { #category : 'actions' }
 StProcessBrowser >> toggleAutoUpdate: aBoolean [
 
-	aBoolean crTrace
+	aBoolean
+		ifTrue: [ self startAutoUpdate ]
+		ifFalse: [ self stopAutoUpdate ]
 ]
 
 { #category : 'actions' }
 StProcessBrowser >> toggleCPUWatcher: aBoolean [
 
-	aBoolean crTrace
+	aBoolean crTrace 
 ]
 
 { #category : 'initialization' }
