@@ -335,7 +335,9 @@ StProcessBrowser >> startAutoUpdate [
 				delay wait.
 				self updatePresenter ].
 			autoUpdateProcess := nil 
-		] forkNamed: 'Auto-update process' ].
+		] 
+		forkAt: Processor userSchedulingPriority
+		named: 'Auto-update process' ].
 	
 	self updatePresenter
 ]
