@@ -13,9 +13,18 @@ Class {
 		'contextToolbarActions',
 		'autoUpdateProcess'
 	],
+	#classVars : [
+		'WellKnownProcesses'
+	],
 	#category : 'NewTools-ProcessBrowser',
 	#package : 'NewTools-ProcessBrowser'
 }
+
+{ #category : 'accessing' }
+StProcessBrowser class >> autoUpdateProcessName [
+
+	^ 'my auto-update process'
+]
 
 { #category : 'accessing' }
 StProcessBrowser class >> defaultExtent [
@@ -23,11 +32,38 @@ StProcessBrowser class >> defaultExtent [
 	^ 800@550
 ]
 
+{ #category : 'class initialization' }
+StProcessBrowser class >> initialize [
+
+	self registerWellKnownProcesses
+]
+
+{ #category : 'private' }
+StProcessBrowser class >> nameAndRulesFor: aProcess [
+	"Answer a nickname and two flags: allow-stop, and allow-debug"
+	^ WellKnownProcesses
+		detect: [ :each | each matchesProcess: aProcess ]
+		ifNone: [ StWellKnownProcess newDefinition: [ aProcess ] allowStop: true allowDebug: true  ]
+]
+
 { #category : 'instance creation' }
 StProcessBrowser class >> open [
 	<script>
 	
 	^ self new open
+]
+
+{ #category : 'private - initialization' }
+StProcessBrowser class >> registerWellKnownProcesses [
+
+	WellKnownProcesses := {
+		StWellKnownProcess newDefinition: [ ] label: 'no process'.
+		StWellKnownProcess newDefinition: [ Smalltalk lowSpaceWatcherProcess ].
+		StWellKnownProcess newDefinition: [ FinalizationProcess runningFinalizationProcess ].
+		StWellKnownProcess newDefinition: [ Processor backgroundProcess ].
+		StWellKnownProcess newDefinition: [ MorphicUIManager uiProcess ].
+		StWellKnownProcess newDefinition: [ Delay schedulingProcess ] 
+	}
 ]
 
 { #category : 'accessing' }
@@ -129,8 +165,27 @@ StProcessBrowser >> buildProcessToolbarActions [
 
 { #category : 'actions' }
 StProcessBrowser >> changePriorityOfSelectedProcess [
+	| process knownProcess newPriority |
 
-	self flag: #TODO.
+	(process := self selectedProcess) ifNil: [ ^ self ].
+	knownProcess := self nameAndRulesFor: process.
+	knownProcess allowDebug 
+		ifFalse: [ ^ self inform: 'Nope, won''t change priority of ', knownProcess label ].
+	
+	newPriority := self application newRequest
+		title: 'Change priority';
+		label: 'New priority';
+		text: process priority asString;
+		openModalWithParent: self window.
+	newPriority ifNil: [ ^ self ].
+	
+	newPriority := newPriority asNumber asInteger.
+	(newPriority between: 1 and: Processor highestPriority) 
+		ifFalse: [ ^ self inform: 'Bad priority' ].
+		
+	process priority: newPriority.
+		
+	self updatePresenter
 ]
 
 { #category : 'initialization' }
@@ -224,7 +279,7 @@ StProcessBrowser >> initializePresenters [
 			
 	(processListPresenter := self newEasyListView)
 		activateOnSingleClick;
-		actions: self processToolbarActions;
+		actions: self processListActions;
 		display: [ :aProcess | self displayForProcess: aProcess ].
 
 	(stackListPresenter := self newEasyListView)
@@ -285,6 +340,27 @@ StProcessBrowser >> model [
 	^ model ifNil: [ model := StProcessBrowserModel new ]
 ]
 
+{ #category : 'private' }
+StProcessBrowser >> nameAndRulesFor: aProcess [
+	"Answer a nickname and two flags: allow-stop, and allow-debug"
+	aProcess == autoUpdateProcess ifTrue: [ 
+		^ {
+			self class autoUpdateProcessName. 
+			false. 
+			false } ].
+
+	^self class nameAndRulesFor: aProcess
+]
+
+{ #category : 'private - accessing' }
+StProcessBrowser >> processListActions [
+
+	^ SpActionGroup new
+		add: self processToolbarActions beDisplayedAsGroup;
+		add: self generalToolbarActions beDisplayedAsGroup;
+		yourself
+]
+
 { #category : 'private - accessing' }
 StProcessBrowser >> processToolbarActions [
 	
@@ -332,7 +408,7 @@ StProcessBrowser >> startAutoUpdate [
 			autoUpdateProcess := nil 
 		] 
 		forkAt: Processor userSchedulingPriority
-		named: 'Auto-update process' ].
+		named: self class autoUpdateProcessName ].
 	
 	self updatePresenter
 ]
