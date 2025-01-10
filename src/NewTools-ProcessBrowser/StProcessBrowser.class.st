@@ -435,9 +435,14 @@ StProcessBrowser >> suspendSelectedProcess [
 
 { #category : 'actions' }
 StProcessBrowser >> terminateSelectedProcess [
-	| process |
+	| process knownProcess |
 
 	(process := self selectedProcess) ifNil: [ ^ self ].
+	
+	knownProcess := self nameAndRulesFor: process.
+	knownProcess allowStop 
+		ifFalse: [ ^ self inform: 'Nope, won''t kill ', knownProcess label ].
+	
 	process terminate.
 	self updatePresenter
 ]
