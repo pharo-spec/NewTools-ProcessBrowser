@@ -210,8 +210,15 @@ StProcessBrowser >> contextToolbarActions [
 
 { #category : 'actions' }
 StProcessBrowser >> debugSelectedProcess [
+	| process knownProcess newPriority |
 
-	self flag: #TODO.
+	(process := self selectedProcess) ifNil: [ ^ self ].
+	knownProcess := self nameAndRulesFor: process.
+	knownProcess allowDebug
+		ifFalse: [ ^ self inform: 'Nope, won''t debug ' , knownProcess label ].
+	
+	process suspendedContext ifNotNil: [ process resume ].
+	process debugWithTitle: 'Interrupted from the Process Browser'
 ]
 
 { #category : 'api - focus' }
