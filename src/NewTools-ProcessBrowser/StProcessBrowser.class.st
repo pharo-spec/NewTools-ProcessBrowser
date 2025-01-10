@@ -66,12 +66,6 @@ StProcessBrowser >> buildGeneralToolbarActions [
 	
 	^ SpActionGroup new
 		addActionWith: [ :action | action 
-			name: 'CPU Watcher';
-			iconName: #watch;
-			description: 'Toggle CPU watcher.';
-			beToggleButton; 
-			action: [ self toggleCPUWatcher: action presenter state ] ];
-		addActionWith: [ :action | action 
 			name: 'Auto update';
 			iconName: #autoUpdate;
 			description: 'Toggle auto processes update.';
@@ -205,8 +199,8 @@ StProcessBrowser >> displayForProcess: aProcess [
 
 { #category : 'private' }
 StProcessBrowser >> ensureAllWatchersAreClosed [
-
-	self flag: #TODO. "This is to cleanup the processes for watching/auto-update"
+	
+	self isAutoUpdating ifTrue: [ self stopAutoUpdate ]
 ]
 
 { #category : 'private - accessing' }
@@ -248,6 +242,7 @@ StProcessBrowser >> initializeWindow: aWindowPresenter [
 	aWindowPresenter
 		title: self class title;
 		initialExtent: self class defaultExtent;
+		windowIcon: (self iconNamed: #processBrowser);
 		whenClosedDo: [ self ensureAllWatchersAreClosed ]
 ]
 
@@ -379,12 +374,6 @@ StProcessBrowser >> toggleAutoUpdate: aBoolean [
 		ifFalse: [ self stopAutoUpdate ]
 ]
 
-{ #category : 'actions' }
-StProcessBrowser >> toggleCPUWatcher: aBoolean [
-
-	aBoolean crTrace 
-]
-
 { #category : 'initialization' }
 StProcessBrowser >> updateCodeFromContext: aContext [
 
@@ -405,7 +394,7 @@ StProcessBrowser >> updateCodeFromContext: aContext [
 StProcessBrowser >> updatePresenter [
 
 	self model ifNil: [ ^ self ].
-	processListPresenter items: self model processList.
+	processListPresenter updateItemsKeepingSelection: self model processList.
 	self updateToolbar
 ]
 
