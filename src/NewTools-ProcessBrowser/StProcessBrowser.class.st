@@ -38,6 +38,18 @@ StProcessBrowser class >> initialize [
 	self registerWellKnownProcesses
 ]
 
+{ #category : 'world menu' }
+StProcessBrowser class >> menuCommandOn: aBuilder [
+	<worldMenu>
+
+	(aBuilder item: #'New Process Browser')
+		parent: #NewToolsMenu;
+		order: 3;
+		action:[ self new open ];
+		help: 'Provides a view of all of the processes (threads) executing in Smalltalk.';
+		iconName: self taskbarIconName
+]
+
 { #category : 'private' }
 StProcessBrowser class >> nameAndRulesFor: aProcess [
 	"Answer a nickname and two flags: allow-stop, and allow-debug"
@@ -64,6 +76,12 @@ StProcessBrowser class >> registerWellKnownProcesses [
 		StWellKnownProcess newDefinition: [ MorphicUIManager uiProcess ].
 		StWellKnownProcess newDefinition: [ Delay schedulingProcess ] 
 	}
+]
+
+{ #category : 'world menu' }
+StProcessBrowser class >> taskbarIconName [
+
+	^ #processBrowser
 ]
 
 { #category : 'accessing' }
