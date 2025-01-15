@@ -75,7 +75,7 @@ StProcessBrowser class >> title [
 { #category : 'actions' }
 StProcessBrowser >> browseSelectedContext [
 
-	self flag: #TODO
+	self selectedContext ifNotNil: [ :aContext | aContext receiver browse ]
 ]
 
 { #category : 'private' }
@@ -88,6 +88,12 @@ StProcessBrowser >> buildContextToolbarActions [
 			description: 'Inspect selected context.';
 			shortcutKey: $i actionModifier;
 			action: [ self inspectSelectedContext ] ];
+		addActionWith: [ :action | action 
+			name: 'Inspect Receiver';
+			iconName: #smallInspectIt;
+			description: 'Inspect selected context receiver.';
+			shortcutKey: $i shift actionModifier;
+			action: [ self inspectSelectedContextReceiver ] ];
 		addActionWith: [ :action | action 
 			name: 'Browse';
 			iconName: #smallSystemBrowser;
@@ -134,6 +140,13 @@ StProcessBrowser >> buildProcessToolbarActions [
 			action: [ self suspendSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
+			name: 'Signal';
+			iconName: #signal; 
+			description: 'Signal this process semaphore.';
+			shortcutKey: $s shift actionModifier;
+			action: [ self signalSelectedProcess ];
+			actionEnabled: [ self selectedProcess notNil ] ];
+		addActionWith: [ :action | action 
 			name: 'Priority';
 			iconName: #priority; 
 			description: 'Change priority of selected process.';
@@ -147,12 +160,12 @@ StProcessBrowser >> buildProcessToolbarActions [
 			shortcutKey: $d actionModifier;
 			action: [ self debugSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
-		addActionWith: [ :action | action 
+		"addActionWith: [ :action | action 
 			name: 'Profile';
 			iconName: #smallProfile; 
 			description: 'Profile selected process.';
 			action: [ self profileSelectedProcess ];
-			actionEnabled: [ self selectedProcess notNil ] ];
+			actionEnabled: [ self selectedProcess notNil ] ];"
 		addActionWith: [ :action | action 
 			name: 'Inspect';
 			iconName: #smallInspectIt;
@@ -311,7 +324,13 @@ StProcessBrowser >> initializeWindow: aWindowPresenter [
 { #category : 'actions' }
 StProcessBrowser >> inspectSelectedContext [
 
-	self flag: #TODO
+	self selectedContext inspect
+]
+
+{ #category : 'actions' }
+StProcessBrowser >> inspectSelectedContextReceiver [
+
+	self selectedContext ifNotNil: [ :aContext | aContext receiver inspect ]
 ]
 
 { #category : 'actions' }
@@ -375,12 +394,6 @@ StProcessBrowser >> processToolbarActions [
 ]
 
 { #category : 'actions' }
-StProcessBrowser >> profileSelectedProcess [
-
-	self flag: #TODO.
-]
-
-{ #category : 'actions' }
 StProcessBrowser >> refreshProcessList [
 
 	self model updateProcessList.
@@ -397,6 +410,16 @@ StProcessBrowser >> selectedContext [
 StProcessBrowser >> selectedProcess [
 
 	^ processListPresenter ifNotNil: #selectedItem
+]
+
+{ #category : 'actions' }
+StProcessBrowser >> signalSelectedProcess [
+	| process |
+
+	(process := self selectedProcess) ifNil: [ ^ self ].
+	[ process suspendingList signal ] fork.
+	(Delay forMilliseconds: 300) wait.
+	self updatePresenter
 ]
 
 { #category : 'private' }
@@ -474,7 +497,7 @@ StProcessBrowser >> updateCodeFromContext: aContext [
 	
 	codePresenter
 		enabled: true;
-		beForMethod: aContext method;
+		beForContext: aContext;
 		text: aContext method sourceCode
 ]
 
