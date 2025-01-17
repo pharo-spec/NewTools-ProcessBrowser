@@ -11,7 +11,10 @@ Class {
 		'generalToolbarPresenter',
 		'generalToolbarActions',
 		'contextToolbarActions',
-		'autoUpdateProcess'
+		'autoUpdateProcess',
+		'autoUpdateAction',
+		'autoUpdating',
+		'updatingPresenters'
 	],
 	#classVars : [
 		'WellKnownProcesses'
@@ -125,12 +128,12 @@ StProcessBrowser >> buildContextToolbarActions [
 StProcessBrowser >> buildGeneralToolbarActions [
 	
 	^ SpActionGroup new
-		addActionWith: [ :action | action 
+		addActionWith: [ :action | (autoUpdateAction := action) 
 			name: 'Auto update';
 			iconName: #autoReload;
 			description: 'Toggle auto processes update.';
 			beToggleButton;
-			action: [ self toggleAutoUpdate: action presenter state ] ];
+			action: [ self toggleAutoUpdate ]];
 		addActionWith: [ :action | action 
 			name: 'Refresh';
 			iconName: #refresh;
@@ -300,6 +303,14 @@ StProcessBrowser >> ensureAllWatchersAreClosed [
 StProcessBrowser >> generalToolbarActions [	
 	
 	^ generalToolbarActions	 ifNil: [ generalToolbarActions := self buildGeneralToolbarActions ]
+]
+
+{ #category : 'initialization' }
+StProcessBrowser >> initialize [
+
+	super initialize.
+	autoUpdating := false.
+	updatingPresenters := false
 ]
 
 { #category : 'initialization' }
@@ -496,11 +507,25 @@ StProcessBrowser >> terminateSelectedProcess [
 ]
 
 { #category : 'actions' }
+StProcessBrowser >> toggleAutoUpdate [
+
+	updatingPresenters ifTrue: [ ^ self ].
+	self updatingWhile: [ 
+		autoUpdating := autoUpdating not.
+		autoUpdating
+			ifTrue: [ self startAutoUpdate ]
+			ifFalse: [ self stopAutoUpdate ].
+		autoUpdateAction presenter state: autoUpdating ]
+]
+
+{ #category : 'actions' }
 StProcessBrowser >> toggleAutoUpdate: aBoolean [
 
-	aBoolean
-		ifTrue: [ self startAutoUpdate ]
-		ifFalse: [ self stopAutoUpdate ]
+	updatingPresenters ifTrue: [ ^ self ].
+	self updatingWhile: [ 
+		aBoolean
+			ifTrue: [ self startAutoUpdate ]
+			ifFalse: [ self stopAutoUpdate ] ]
 ]
 
 { #category : 'initialization' }
@@ -532,4 +557,14 @@ StProcessBrowser >> updateToolbar [
 
 	self processToolbarActions allCommands
 		do: [ :each | each updateEnableStatus ]
+]
+
+{ #category : 'private' }
+StProcessBrowser >> updatingWhile: aBlock [
+	| oldUpdating |
+	
+	oldUpdating := updatingPresenters.
+	updatingPresenters := true.
+	aBlock ensure: [ 
+		updatingPresenters := oldUpdating ]
 ]
