@@ -127,7 +127,7 @@ StProcessBrowser >> buildGeneralToolbarActions [
 	^ SpActionGroup new
 		addActionWith: [ :action | action 
 			name: 'Auto update';
-			iconName: #autoUpdate;
+			iconName: #autoReload;
 			description: 'Toggle auto processes update.';
 			beToggleButton;
 			action: [ self toggleAutoUpdate: action presenter state ] ];
@@ -159,14 +159,14 @@ StProcessBrowser >> buildProcessToolbarActions [
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Signal';
-			iconName: #signal; 
+			iconName: #play; 
 			description: 'Signal this process semaphore.';
 			shortcutKey: $s shift actionModifier;
 			action: [ self signalSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
 			name: 'Priority';
-			iconName: #priority; 
+			iconName: #up; 
 			description: 'Change priority of selected process.';
 			shortcutKey: $p actionModifier;
 			action: [ self changePriorityOfSelectedProcess ];
