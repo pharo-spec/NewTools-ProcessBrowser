@@ -150,7 +150,7 @@ StProcessBrowser >> buildProcessToolbarActions [
 			name: 'Terminate';
 			iconName: #stop; 
 			description: 'Terminate selected process.';
-			shortcutKey: $t actionModifier;
+			shortcutKey: $x actionModifier;
 			action: [ self terminateSelectedProcess ];
 			actionEnabled: [ self selectedProcess notNil ] ];
 		addActionWith: [ :action | action 
