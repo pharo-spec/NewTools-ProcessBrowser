@@ -95,7 +95,7 @@ StWellKnownProcess >> definition: aBlock [
 { #category : 'accessing' }
 StWellKnownProcess >> label [
 
-	^ label
+	^ label ifNil: [ self definition asString lines first ]
 ]
 
 { #category : 'accessing' }

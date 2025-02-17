@@ -500,7 +500,7 @@ StProcessBrowser >> terminateSelectedProcess [
 	
 	knownProcess := self nameAndRulesFor: process.
 	knownProcess allowStop 
-		ifFalse: [ ^ self inform: 'Nope, won''t kill ', knownProcess label ].
+		ifFalse: [ ^ self inform: 'Nope, won''t kill ', (knownProcess label) ].
 	
 	process terminate.
 	self updatePresenter
