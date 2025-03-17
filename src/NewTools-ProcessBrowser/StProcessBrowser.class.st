@@ -244,7 +244,7 @@ StProcessBrowser >> contextToolbarActions [
 
 { #category : 'actions' }
 StProcessBrowser >> debugSelectedProcess [
-	| process knownProcess newPriority |
+	| process knownProcess |
 
 	(process := self selectedProcess) ifNil: [ ^ self ].
 	knownProcess := self nameAndRulesFor: process.
